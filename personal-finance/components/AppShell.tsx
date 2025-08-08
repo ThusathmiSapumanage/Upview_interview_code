@@ -12,21 +12,13 @@ import {
 } from "@ant-design/icons";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import ProfileAvatar from "@/components/ProfileAvatar";
 
 const { Header, Sider, Content } = Layout;
 
 function Brand({ collapsed }: { collapsed: boolean }) {
-  // Simple round logo with an S — matches the vibe in the mock
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: 12,
-        height: 56,
-      }}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 12, height: 56 }}>
       <div
         style={{
           width: 28,
@@ -57,8 +49,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
+  // avatar state
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      setEmail(user?.email ?? null);
+
+      if (user) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("id", user.id)
+          .maybeSingle();
+        setAvatarUrl(prof?.avatar_url || undefined);
+      }
+    })();
   }, []);
 
   const onLogout = async () => {
@@ -74,6 +83,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const userMenu = {
     items: [
       { key: "email", label: email || "Signed in", disabled: true },
+      { key: "change_photo", label: "Change photo", onClick: () => setAvatarOpen(true) },
       { type: "divider" as const },
       { key: "logout", icon: <LogoutOutlined />, label: "Logout", onClick: onLogout },
     ],
@@ -81,7 +91,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f7fb" }}>
-      <Sider collapsible collapsed={collapsed} trigger={null} width={200} style={{ background: "#fff" }}>
+      <Sider collapsible={false} collapsed={collapsed} trigger={null} width={200} style={{ background: "#fff" }}>
         <Brand collapsed={collapsed} />
         <Menu
           mode="inline"
@@ -122,7 +132,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <Dropdown menu={userMenu} trigger={["click"]}>
             <Space style={{ color: "#0f172a", cursor: "pointer" }}>
-              <Avatar icon={<UserOutlined />} />
+              <Avatar src={avatarUrl} icon={<UserOutlined />} />
               <span>{email || "Account"}</span>
             </Space>
           </Dropdown>
@@ -130,6 +140,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
         <Content style={{ padding: 24 }}>{children}</Content>
       </Layout>
+
+      {/* Profile photo modal */}
+      <ProfileAvatar
+        open={avatarOpen}
+        onClose={() => setAvatarOpen(false)}
+        onChanged={(url) => setAvatarUrl(url)}
+      />
     </Layout>
   );
 }
