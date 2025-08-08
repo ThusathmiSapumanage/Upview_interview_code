@@ -1,4 +1,4 @@
-import AppShell from "@/components/AppShell";
+import ClientLayout from "../components/ClientLayout";
 
 export const metadata = {
   title: "Personal Finance",
@@ -8,8 +8,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, background: "#0B1220", color: "#E6EAF2", fontFamily: "Inter, system-ui, Arial" }}>
-        <AppShell>{children}</AppShell>
+      <body style={{ margin: 0, background: "#f5f7fb", color: "#0f172a", fontFamily: "Inter, system-ui, Arial" }}>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
