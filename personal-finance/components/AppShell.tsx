@@ -81,18 +81,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f7fb" }}>
-      <Sider
-        theme="light"
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(c) => setCollapsed(c)}
-        collapsedWidth={72}
-        width={220}
-        breakpoint="lg"
-        style={{ background: "#fff", borderRight: "1px solid #e5e7eb" }}
-      >
+      <Sider collapsible collapsed={collapsed} trigger={null} width={200} style={{ background: "#fff" }}>
         <Brand collapsed={collapsed} />
-
         <Menu
           mode="inline"
           theme="light"
